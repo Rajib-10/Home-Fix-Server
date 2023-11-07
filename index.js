@@ -70,6 +70,28 @@ async function run() {
       res.send(result)
     })
 
+    app.put('/add-services/:id',async(req,res)=>{
+      const id = req.params.id
+      const service = req.body
+     const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+      $set: {
+        serviceUrl: service.serviceUrl,
+        serviceName : service.serviceName,
+        name : service.name,
+        email: service.email,
+        photo: service.photo,
+        price: service.price,
+        area: service.area,
+        description: service.description
+      },
+    };
+    
+    const result = await servicesCollection.updateOne(filter, updateDoc, options);
+    res.send(result)
+    })
+
     app.get('/recent-services',async(req,res)=>{
       const result =await recentServiceCollection.find().toArray();
       res.send(result)
