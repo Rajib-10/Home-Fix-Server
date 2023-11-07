@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express()
@@ -8,7 +9,10 @@ const port = process.env.PORT || 5000
 
 // middleware 
 
-app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:5173'],
+  credentials: true,
+}))
 app.use(express.json())
 
 
@@ -37,6 +41,32 @@ async function run() {
     const recentServiceCollection = client.db("HomeFixDB").collection("recentServices");
      const servicesCollection = client.db("HomeFixDB").collection("services");
      const bookingsCollection = client.db("HomeFixDB").collection("bookings");
+
+
+
+    //  auth
+
+    app.post("/jwt", async (req, res) => {
+      const body = req.body;
+      console.log("log in user", body);
+      const token = jwt.sign(body, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "2h",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: false,
+        })
+
+        .send({ success: true });
+    });
+
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      console.log("server logout user", user);
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+    });
+
 
     app.get('/add-services',async(req,res)=>{
       let query = {}
