@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000
@@ -31,11 +31,55 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
+
+
+
+    const recentServiceCollection = client.db("HomeFixDB").collection("recentServices");
+     const servicesCollection = client.db("HomeFixDB").collection("services");
+     const bookingsCollection = client.db("HomeFixDB").collection("bookings");
+
+    app.get('/add-services',async(req,res)=>{
+      let query = {}
+      if(req.query?.email){
+        query = {email: req.query.email}
+      }
+      const result =await servicesCollection.find(query).toArray();
+      res.send(result)
+    })
+
+
+    app.get('/add-services/:id',async(req,res)=>{
+      const id = req.params.id
+        const query = { _id: new ObjectId(id) };
+        const result = await servicesCollection.findOne(query);
+        res.send(result)
+    })
+   
+
+     app.post('/add-services',async(req,res)=>{
+      const service = req.body
+      console.log(service)
+      const result = await servicesCollection.insertOne(service);
+      res.send(result)
+    })
+
+    app.post('/booking-services',async(req,res)=>{
+      const service = req.body
+      console.log(service)
+      const result = await bookingsCollection.insertOne(service);
+      res.send(result)
+    })
+
+    app.get('/recent-services',async(req,res)=>{
+      const result =await recentServiceCollection.find().toArray();
+      res.send(result)
+    })
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
