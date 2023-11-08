@@ -112,6 +112,15 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/booking-services',async(req,res)=>{
+      let query = {}
+      if(req.query?.email){
+        query = { userEmail: req.query.email}
+      }
+      const result =await bookingsCollection.find(query).toArray();
+      res.send(result)
+    })
+
     app.post('/booking-services',async(req,res)=>{
       const service = req.body
       console.log(service)
@@ -152,6 +161,9 @@ async function run() {
       const result =await recentServiceCollection.find().toArray();
       res.send(result)
     })
+
+
+    
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
