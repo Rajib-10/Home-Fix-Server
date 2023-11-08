@@ -52,7 +52,7 @@ const verifyToken = async (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
 
 
@@ -112,7 +112,8 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/booking-services',async(req,res)=>{
+    app.get('/booking-services',verifyToken,async(req,res)=>{
+      
       let query = {}
       if(req.query?.email){
         query = { userEmail: req.query.email}
@@ -122,10 +123,32 @@ async function run() {
     })
 
     app.get('/booking-services/:id',async(req,res)=>{
+      
       const id = req.params.id
         const query = { _id: new ObjectId(id) };
         const result = await bookingsCollection.findOne(query);
         res.send(result)
+    })
+
+    app.patch('/booking-services/:id',async(req,res)=>{
+      const updateStatus = req.body
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+      $set: {
+       status: updateStatus.status
+      },
+    };
+    const result = await bookingsCollection.updateOne(filter,updateDoc)
+    res.send(result)
+    })
+
+    app.delete('/booking-services/:id',async(req,res)=>{
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+     
+      const result = await bookingsCollection.deleteOne(query);
+      res.send(result)
     })
 
     app.post('/booking-services',async(req,res)=>{
@@ -172,8 +195,8 @@ async function run() {
 
     
 
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
